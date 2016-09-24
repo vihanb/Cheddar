@@ -1,0 +1,9 @@
+class Animal (private name: string, private age: number) {
+    init {
+        print "Created an animal named %s" % self.name
+    }
+
+    (string: name): self(name: name, age: 0) {
+         // initializer body
+    }
+}
