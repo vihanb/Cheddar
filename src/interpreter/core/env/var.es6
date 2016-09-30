@@ -15,7 +15,9 @@ export default class CheddarVariable {
         StrictType = null,
 
         getter = null,
-        setter = null
+        setter = null,
+
+        access = null // Access modifier
     } = {}) {
         this.Value = Value;
 
@@ -24,6 +26,8 @@ export default class CheddarVariable {
 
         this.getter = getter;
         this.setter = setter;
+
+        this.access = access;
     }
 
 }

@@ -5,8 +5,12 @@ import CheddarCustomLexer from '../parsers/custom';
 
 // Tokens
 import CheddarVariableToken from '../literals/var';
-import ClassArguments from './class/arg';
+import ClassArgument from './class/arg';
 import ClassStatement from './class/states';
+
+import CheddarArrayLexer from '../parsers/array';
+
+let ClassArguments = CheddarCustomLexer(CheddarArrayLexer, '(', ')', ClassArgument)
 
 export default class StatementClass extends CheddarLexer {
     exec(tokenizer) {
