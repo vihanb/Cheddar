@@ -83,6 +83,7 @@ export default class CheddarScope {
     }
     static accessor(token) {
         let value = this.Scope.get(token);
+
         if (value && value.Value) {
             value.Value.Reference = token;
             value.Value.scope     = this;
@@ -127,13 +128,17 @@ export default class CheddarScope {
     enforceset = enforceset;
 
     // Property accessors
-    accessor(token) {
+    accessor(token, self) {
         if (!this.has(token))
             return null;
 
         let value = this.Scope.get(token) || (this.inheritanceChain ?
             this.inheritanceChain.accessor(token) : null
         );
+
+        if (value && value.Access === 'private' && self != this) {
+            value = null;
+        }
 
         if (value && value.Value) {
             value.Value.Reference = token;

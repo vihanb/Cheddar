@@ -8,7 +8,7 @@ export default class ClassArguments extends CheddarLexer {
 
         return this.grammar(true,
             [
-                ['private', 'public', 'readonly'], this.jumpWhite,
+                ['private', 'public', 'readonly', ''], this.jumpWhite,
                 [[ CheddarVariableToken, ':' ]],
                 CheddarVariableToken, ['?']
             ]

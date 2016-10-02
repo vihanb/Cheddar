@@ -3,7 +3,7 @@ class Animal (private name: string, private age: number) {
         print "Created an animal named %s" % self.name
     }
 
-    (string: name): self(name: name, age: 0) {
+    (private string: name): (name: name, age: 0) {
          // initializer body
     }
 }
