@@ -11,7 +11,7 @@ import CheddarError from '../consts/err';
 export default class CheddarFunction extends CheddarClass {
     static Name = "Function";
 
-    constructor(args, body) {
+    constructor(args, body, data) {
         super(null);
 
         // List of arguments the
@@ -25,6 +25,10 @@ export default class CheddarFunction extends CheddarClass {
         //  native function or a
         //  exec/eval pattern body
         this.body = body;
+
+        // General data object
+        //  includes permissons
+        this.data = data;
 
         // Does the function have a self-alias?
         this.selfRef = null;
@@ -127,7 +131,8 @@ export default class CheddarFunction extends CheddarClass {
                 this.body.constructor.name === "StatementExpression" ?
                 this.body :
                 this.body._Tokens[0],
-                scope
+                scope,
+                this.data
             ).exec();
 
             if (res instanceof Signal) {

@@ -2,6 +2,7 @@ import CheddarLexer from '../../tok/lex';
 import * as CheddarError from '../../consts/err';
 
 import ClassStateInit from './states/init';
+import ClassStateFunc from './states/method';
 
 export default class ClassSingleStatement extends CheddarLexer {
     exec(tokenizer) {
@@ -10,7 +11,8 @@ export default class ClassSingleStatement extends CheddarLexer {
         return this.attempt(
             /* Class Statement List */
             [
-                ClassStateInit
+                ClassStateInit,
+                ClassStateFunc
             ], tokenizer
         );
     }

@@ -14,8 +14,9 @@ export default class ClassStatement extends CheddarLexer {
 
         while (res instanceof CheddarLexer && res.Errored !== true) {
             items.push(res);
-
             this.Index = res.Index;
+
+            //this.jumpLiteral(';');
 
             match = new ClassSingleStatement(this.Code, this.Index);
             res = match.exec(tokenizer);
@@ -26,10 +27,6 @@ export default class ClassStatement extends CheddarLexer {
             this._Tokens = items;
             return this.close();
         } else {
-            // And a bork bork here and a bork bork there
-            // here a bork there a bork, everywhere a bork bork
-            //console.log("PLS HALP THERES BORK HERE PLS");
-            //console.log(res);
             return res;
         }
     }

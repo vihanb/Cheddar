@@ -1,5 +1,9 @@
 import CheddarClass from '../core/env/class';
 import CheddarVariable from '../core/env/var';
+import CheddarScope from '../core/env/scope';
+import CheddarExec from '../exec';
+
+import CheddarFunction from '../core/env/func';
 
 // Gets the appropriate string token from a token list
 function tostr(str, n = 0) {
@@ -78,6 +82,16 @@ export default class CheddarClassHandler {
 
 
 
+        /** CLASS DEFINITON **/
+        let newClass = class extends CheddarClass {
+            static Name = className;
+        };
+
+        newClass.prototype.Scope = new Map();
+
+
+
+
         /** PRIMARY CONSTRUCTOR HANDLING **/
 
         // if there is no paramList, assume it's actually the body
@@ -110,6 +124,9 @@ export default class CheddarClassHandler {
         // The initalizer
         let defaultInitalizer;
 
+        // Create the scope
+        let classScope = new Map();
+
 
         /** CLASS BODY HANDLING **/
         body = body._Tokens;
@@ -119,7 +136,55 @@ export default class CheddarClassHandler {
 
             // Handle class states
             if (statementName === "ClassStateInit") {
+                if (defaultInitalizer)
+                    return `Duplicate primary initalizer`;
                 defaultInitalizer = tostr(tostr(body[i]));
+            } else if (statementName === "ClassStateMethod") {
+
+
+
+
+                /** METHOD HANDLING **/
+
+                let method = body[i];
+                let isLambda; // Lambdas run through a seperate token seperation
+                let methodName;
+
+                // 1 token means that one token is a StatementFunc
+                //  and should be unpacked
+                if (method._Tokens.length === 1) {
+                    method = tostr(method);
+                    isLambda = false;
+                } else {
+                    isLambda = true;
+                }
+
+                methodName = tostr(tostr(method));
+
+                let methodTokens; // Tokens to use for method
+
+                if (isLambda) {
+                    methodTokens = tostr(method, 1)._Tokens;
+                } else {
+                    methodTokens = method._Tokens.slice(1);
+                }
+
+                let resFunc = new CheddarFunction(this.scope, methodName, {
+                    perms: newClass
+                });
+
+                resFunc.init(...methodTokens);
+
+                newClass.prototype.Scope.set(
+                    methodName,
+                    new CheddarVariable(
+                        resFunc,
+                        {
+                            Writeable: false
+                        }
+                    )
+                );
+
             }
 
         }
@@ -138,69 +203,83 @@ export default class CheddarClassHandler {
         if (constructors.length === 0) constructors.push([]);
 
 
+        /** CLASS INITALIZER **/
+        newClass.prototype.init = function(...initArgs) {
+            // TODO: Optimize
+            initArgs = initArgs.filter(i => i);
 
+            // Locate matching constructor
+            let matchingConstructor;
 
-        /** CLASS OBJECT **/
-        let newClass = class extends CheddarClass {
-            static Name = className;
+            constructorLookup:
+            for (let i = 0; i < constructors.length; i++) {
+                // Avoid iterating and do basic check
+                if (initArgs.length !== constructors[i].length) {
+                    continue constructorLookup;
+                }
 
-            // Create the initalizer
-            init(...initArgs) {
-                // TODO: Optimize
-                initArgs = initArgs.filter(i => i);
-
-                // Locate matching constructor
-                let matchingConstructor;
-
-                constructorLookup:
-                for (let i = 0; i < constructors.length; i++) {
-                    // Avoid iterating and do basic check
-                    if (initArgs.length !== constructors[i].length) {
+                for (let j = 0; j < constructors[i].length; j++) {
+                    if (
+                        constructors[i][j].type &&
+                        !(initArgs[j] instanceof constructors[i][j].type)
+                    ) {
                         continue constructorLookup;
                     }
-
-                    for (let j = 0; j < constructors[i].length; j++) {
-                        if (
-                            constructors[i][j].type &&
-                            !(initArgs[j] instanceof constructors[i][j].type)
-                        ) {
-                            continue constructorLookup;
-                        }
-                    }
-                    matchingConstructor = constructors[i];
                 }
-
-                // If no matching constructor found, error
-                if (!matchingConstructor) {
-                    return paramErr(constructors, initArgs, className);
-                }
-
-
-                /** ININTALIZE PARAMETERS **/
-                let res;
-                for (let i = 0;  i < matchingConstructor.length; i++) {
-                    if (matchingConstructor[i].access) {
-                        res = this.manage(
-                            matchingConstructor[i].name,
-                            new CheddarVariable(
-                                initArgs[i], {
-                                    Writeable: true,
-                                    StrictType: matchingConstructor[i].type,
-                                    Access: matchingConstructor[i].access
-                                }
-                            )
-                        );
-
-                        if (res !== true) {
-                            return res;
-                        }
-                    }
-                }
-
-
-
-                return true;
+                matchingConstructor = constructors[i];
             }
+
+            // If no matching constructor found, error
+            if (!matchingConstructor) {
+                return paramErr(constructors, initArgs, className);
+            }
+
+
+            /** ININTALIZE PARAMETERS **/
+            let res;
+            for (let i = 0;  i < matchingConstructor.length; i++) {
+                if (matchingConstructor[i].access) {
+                    res = this.manage(
+                        matchingConstructor[i].name,
+                        new CheddarVariable(
+                            initArgs[i], {
+                                Writeable: true,
+                                StrictType: matchingConstructor[i].type,
+                                Access: matchingConstructor[i].access
+                            }
+                        )
+                    );
+
+                    if (res !== true) {
+                        return res;
+                    }
+                }
+            }
+
+            /** CALL INITALISER **/
+            if (defaultInitalizer) {
+                let scope = new CheddarScope(this);
+
+                scope.setter(
+                    "self",
+                    new CheddarVariable(
+                        this,
+                        {
+                            Writeable: false
+                        }
+                    )
+                );
+
+                let init = new CheddarExec(defaultInitalizer, scope, {
+                    perms: newClass
+                }).exec();
+
+                if (typeof init === 'string')
+                    return init;
+            }
+
+
+            return true;
         };
 
         // Add the class to the scope

@@ -1,9 +1,11 @@
-class Animal (private name: string, private age: number) {
+class Animal (private string: name, public number: age) {
     init {
         print "Created an animal named %s" % self.name
     }
 
-    (private string: name): (name: name, age: 0) {
-         // initializer body
-    }
+    func getName -> self.name
 }
+
+let myDog: Animal = Animal { "Max", 3 };
+print "It is %d years old" % myDog.age;
+print "It's name is %s" % myDog.getName();

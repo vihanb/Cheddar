@@ -128,7 +128,7 @@ export default class CheddarScope {
     enforceset = enforceset;
 
     // Property accessors
-    accessor(token, self) {
+    accessor(token, self = {}) {
         if (!this.has(token))
             return null;
 
@@ -136,7 +136,7 @@ export default class CheddarScope {
             this.inheritanceChain.accessor(token) : null
         );
 
-        if (value && value.Access === 'private' && self != this) {
+        if (value && value.Access === 'private' && self !== this.constructor) {
             value = null;
         }
 
@@ -149,7 +149,6 @@ export default class CheddarScope {
     }
 
     setter(path, setter) {
-        //console.log(this.Scope);
         this.Scope.set(path, setter);
     }
 }
