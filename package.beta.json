@@ -1,0 +1,67 @@
+{
+  "name": "cheddar-lang-beta",
+  "description": "Cheddar beta release channel",
+  "homepage": "http://cheddar.vihan.org/",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cheddar-lang/Cheddar.git"
+  },
+  "author": "Vihan <contact@vihan.org> (http://vihan.org/)",
+  "tags": [
+    "javascript",
+    "language",
+    "interpreter",
+    "cheddar",
+    "cheese",
+    "food"
+  ],
+  "version": "1.0.0",
+  "dependencies": {
+    "atob": "^2.0.3",
+    "bases": "^0.2.1",
+    "btoa": "^1.1.2",
+    "colors": "^1.1.2",
+    "commander": "^2.9.0",
+    "crypto": "0.0.3",
+    "readline": "^1.3.0",
+    "xregexp": "^3.1.1"
+  },
+  "bin": {
+    "cheddar-beta": "dist/cli/cheddar"
+  },
+  "scripts": {
+    "prepublish": "make",
+    "build": "make build",
+    "test": "make test",
+    "start": "./dist/cli/cheddar",
+    "coveralls": "make test && cat ./coverage/lcov.info | ./node_modules/.bin/coveralls",
+    "browser_build": "make browser_build"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.11.4",
+    "babel-core": "^6.13.2",
+    "babel-istanbul": "^0.11.0",
+    "babel-plugin-add-module-exports": "^0.2.1",
+    "babel-plugin-transform-class-properties": "^6.11.5",
+    "babel-preset-es2015": "^6.13.2",
+    "browserify": "^13.1.0",
+    "chai": "^3.5.0",
+    "codecov.io": "^0.1.6",
+    "coveralls": "^2.11.12",
+    "install": "^0.8.1",
+    "mocha": "^3.0.1",
+    "npm": "^3.10.6",
+    "remap-istanbul": "^0.6.4"
+  },
+  "main": "dist/cli/cheddar",
+  "directories": {
+    "test": "test"
+  },
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/cheddar-lang/Cheddar/issues"
+  },
+  "config": {
+    "unsafe-perm": true
+  }
+}

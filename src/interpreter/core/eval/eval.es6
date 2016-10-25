@@ -160,6 +160,7 @@ export default class CheddarEval extends CheddarCallStack {
 
                 if (OPERATOR === CheddarError.NO_OP_BEHAVIOR) {
                     NAME = TOKEN.RHS_Operator;
+                    console.log("FAIL...");
                     run_op(TOKEN, DATA); // Run the operator again
                 }
             }

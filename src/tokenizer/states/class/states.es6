@@ -16,7 +16,7 @@ export default class ClassStatement extends CheddarLexer {
             items.push(res);
             this.Index = res.Index;
 
-            //this.jumpLiteral(';');
+            this.jumpLiteral(';');
 
             match = new ClassSingleStatement(this.Code, this.Index);
             res = match.exec(tokenizer);

@@ -17,8 +17,13 @@ export default class StatementClass extends CheddarLexer {
         this.open(false);
 
         return this.grammar(true,
-            ['class', this.jumpWhite, CheddarVariableToken, [ClassArguments], '{',
-                CheddarCustomLexer(ClassStatement, tokenizer), '}'
+            [
+                'class', this.jumpWhite, CheddarVariableToken,
+                [ClassArguments],
+                [['extends', this.jumpWhite, CheddarVariableToken]],
+                '{',
+                    CheddarCustomLexer(ClassStatement, tokenizer),
+                '}'
             ]
         );
     }

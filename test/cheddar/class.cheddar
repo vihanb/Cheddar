@@ -1,11 +1,21 @@
-class Animal (private string: name, public number: age) {
+class Animal (public string: name, public number: age) {
     init {
-        print "Created an animal named %s" % self.name
+        print "Created an animal named %s" % self.name;
     }
 
-    func getName -> self.name
+    binary op + (a, b) {
+        print a.name;
+        print b.name;
+    }
+
+    func getName -> self.name;
+    func getAge  -> self.age
 }
 
 let myDog: Animal = Animal { "Max", 3 };
 print "It is %d years old" % myDog.age;
 print "It's name is %s" % myDog.getName();
+print "It's age is %d" % myDog.getAge();
+
+let myGoat: Animal = Animal { "Downgoat", 5 };
+print myDog + myGoat;

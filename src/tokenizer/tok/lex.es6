@@ -237,6 +237,12 @@ export default class CheddarLexer {
                                 index += defs[i][j][0].length;
                                 tokens.push(defs[i][j][0]);
                             }
+                        } else if (defs[i][j][0] === this.jumpWhite) {
+                            let oldIndex = this.Index;
+                            this.Index = index;
+                            this.jumpWhite();
+                            index = this.Index;
+                            this.Index = oldIndex;
                         } else {
                             parser = this.initParser(defs[i][j][0], index);
                             result = parser.exec();
@@ -313,8 +319,12 @@ export default class CheddarLexer {
                     if (result)
                         index = this.Index;
                     this.Index = oldIndex;
-                    if (!result)
+                    if (!result) {
                         continue main;
+                    } else if (defs[i][j + 1] === CheddarError.KEEP_ITEM) {
+                        tokens.push(defs[i][j]);
+                        j++;
+                    }
                 }
             }
 

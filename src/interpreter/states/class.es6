@@ -3,6 +3,8 @@ import CheddarVariable from '../core/env/var';
 import CheddarScope from '../core/env/scope';
 import CheddarExec from '../exec';
 
+import CheddarError from '../core/consts/err';
+
 import CheddarFunction from '../core/env/func';
 
 // Gets the appropriate string token from a token list
@@ -89,6 +91,9 @@ export default class CheddarClassHandler {
 
         newClass.prototype.Scope = new Map();
 
+        newClass.OpBinary = new Map();
+        newClass.OpUnary = new Map();
+
 
 
 
@@ -124,8 +129,7 @@ export default class CheddarClassHandler {
         // The initalizer
         let defaultInitalizer;
 
-        // Create the scope
-        let classScope = new Map();
+
 
 
         /** CLASS BODY HANDLING **/
@@ -184,6 +188,94 @@ export default class CheddarClassHandler {
                         }
                     )
                 );
+
+            } else if (statementName === "ClassStateOp") {
+
+
+
+
+                /** OPERATOR OVERLOADING **/
+                let statementTokens = body[i]._Tokens;
+
+                let binaryOrUnary = statementTokens[0];
+                let operatorLiteral = statementTokens[1];
+                let callbackArgs = statementTokens[2];
+                let callbackFunc = statementTokens[3];
+
+                if (newClass.Operator.get(operatorLiteral) === CheddarClass.Operator.get(operatorLiteral)) {
+                    newClass.Operator.set(
+                        operatorLiteral,
+                        function(LHS, RHS) {
+                            if (LHS === null) {
+                                if (newClass.OpUnary.has(operatorLiteral)) {
+                                    // Execute with RHS
+                                    let [
+                                        args, data
+                                    ] = newClass.OpUnary.get(operatorLiteral);
+
+                                    args = args._Tokens.map(i => i._Tokens[0]);
+
+                                    let scope = new CheddarScope(LHS);
+                                    scope.setter(
+                                        "self",
+                                        new CheddarVariable(
+                                            RHS,
+                                            {
+                                                Writeable: false
+                                            }
+                                        )
+                                    );
+
+                                    if (args[0]) scope.setter(args[0], new CheddarVariable(RHS, { Writeable: false }));
+                                    return new CheddarExec(tostr(data), scope, {
+                                        perms: newClass
+                                    }).exec();
+                                }
+                            } else if (newClass.OpBinary.has(operatorLiteral)) {
+                                // Execute with LHS, RHS
+                                let [
+                                    args, data
+                                ] = newClass.OpBinary.get(operatorLiteral);
+
+                                args = args._Tokens.map(i => i._Tokens[0]);
+
+                                let scope = new CheddarScope(LHS);
+                                scope.setter(
+                                    "self",
+                                    new CheddarVariable(
+                                        LHS,
+                                        {
+                                            Writeable: false
+                                        }
+                                    )
+                                );
+
+                                // TODO: enforce constants
+                                if (args[0]) scope.setter(args[0], new CheddarVariable(LHS, { Writeable: false }));
+                                if (args[1]) scope.setter(args[1], new CheddarVariable(RHS, { Writeable: false }));
+
+                                return new CheddarExec(tostr(data), scope, {
+                                    perms: newClass
+                                }).exec();
+                            } else {
+                                return CheddarError.NO_OP_BEHAVIOR;
+                            }
+                        }
+                    )
+                }
+
+                // Assign codeblocks
+                if (binaryOrUnary === 'binary') {
+                    newClass.OpBinary.set(
+                        operatorLiteral,
+                        [callbackArgs, callbackFunc]
+                    )
+                } else if (binaryOrUnary === 'unary') {
+                    newClass.OpUnary.set(
+                        operatorLiteral,
+                        [callbackArgs, callbackFunc]
+                    )
+                }
 
             }
 
